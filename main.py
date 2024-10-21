@@ -1,4 +1,3 @@
-from re import search
 from Translation.translation import Translation
 from sys import argv
 from os import path
@@ -15,6 +14,10 @@ def main() -> None:
         translation = Translation(pseudocode)
         translation.compile()
         translation.transpile()
+
+        # A rare time and never should anyone break the practice of importing at the top
+        # This is to run the transpiled file
+        import temp.transpiled
 
 if __name__ == "__main__":
     main()    

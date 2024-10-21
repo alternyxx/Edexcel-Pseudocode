@@ -1,1 +1,2 @@
-SEND 'Have a good day.' TO DISPLAY
+SET hello TO 'hello, world'
+SEND hello TO DISPLAY
