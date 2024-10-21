@@ -1,4 +1,4 @@
-from re import search
+from re import search, match
 from os import path
 
 class Translation():
@@ -7,20 +7,20 @@ class Translation():
         self._transpiled = ''
 
     @property
+    def pseudocode(self) -> str:
+        return self._pseudocode
+
+    @pseudocode.setter
     def pseudocode(self, pseudocode: str) -> None:
         self._pseudocode = pseudocode
-
-    @pseudocode.getter
-    def pseudocode(self):
-        return self._pseudocode
     
     def compile(self):
         indent = ''
         for line in self.pseudocode:
-            if var := search(rf'^{indent}SEND (.)+ TO DISPLAY'):
-                self.transpiled += 'print(var)'
+            if var := match(rf"{indent}SEND ([^ ]|'.*') TO DISPLAY", line):
+                self._transpiled += f'print({var.group(1)})'
 
-    def transpile(self, path):
+    def transpile(self):
         try:
             with open(path.join('temp', 'transpiled.py'), 'w') as transpiled_file:
                 transpiled_file.write(self._transpiled)
