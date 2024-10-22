@@ -1,2 +1,2 @@
-SET hello TO 'hello, world'
+SET hello TO ['hello, world', 'goodbye, world']
 SEND hello TO DISPLAY

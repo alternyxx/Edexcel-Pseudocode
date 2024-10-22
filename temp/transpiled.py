@@ -1,2 +1,2 @@
-hello = 'hello, world'
+hello = ['hello, world', 'goodbye, world']
 print(hello)

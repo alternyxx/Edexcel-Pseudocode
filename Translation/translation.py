@@ -25,13 +25,16 @@ class Translation():
 
         for line in self.pseudocode:
 
-            # Check if the line is a declaration and initialization of a variable
-            if var_set := match(rf"{indent}SET ([^ ]+) TO ([0-9]+|'.*'|[^ ])", line):
-                self._transpiled += f'{var_set.group(1)} = {var_set.group(2)}\n'
+            # Check if the line is a declaration and initialization of a variable #(?:, \[.*\])*)
+            if var_set := match(rf"{indent}SET ([^ ]+)( \[[0-9+]\])? TO ([^ \[\]]+(?:\[0-9+\])?|'.*'|\[.*\])", line):
+                if var_set.group(2):
+                    self._transpiled += f'{var_set.group(1)}{var_set.group(2)} = {var_set.group(3)}' 
+                else:
+                    self._transpiled += f'{var_set.group(1)} = {var_set.group(3)}\n'
 
             # Check if the line is a print function
-            elif print_function := match(rf"{indent}SEND ([^ ]+|'.*') TO DISPLAY", line):
-                self._transpiled += f'print({print_function.group(1)})\n'
+            elif print_function := match(rf"{indent}SEND ([^ \[\]]+(?: \[0-9+\])?|'.*'|\[.*\]) TO DISPLAY", line):
+                self._transpiled += f'print({print_function.group(1).replace(' ', '')})\n'
 
 
     def transpile(self):
