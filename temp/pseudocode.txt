@@ -1,2 +1,8 @@
-SET hello TO ['hello, world', 'goodbye, world']
+SET hello TO ['hello, world', 'goodbye, world', 'hello', 'world']
 SEND hello TO DISPLAY
+
+SET a TO 0
+WHILE a != 3 DO
+    SEND hello[a] TO DISPLAY
+    SET a TO a + 1
+END WHILE

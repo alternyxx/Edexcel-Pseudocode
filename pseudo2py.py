@@ -12,12 +12,15 @@ def main() -> None:
     else:
         translation = Translation(pseudocode)
         translation.compile()
-        translation.transpile()
+        translation.output_file()
 
         # A rare time and never should anyone break the practice of importing at the top
         # This is to run the transpiled file
         import temp.transpiled
 
-        
+def parsing() -> None:
+    ...
+
+
 if __name__ == "__main__":
     main()    
