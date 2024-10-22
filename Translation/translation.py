@@ -65,7 +65,8 @@ class Translation():
             elif fullmatch(rf'REPEAT', line):
                 ...
             
-            elif define := match(rf"FUNCTION")
+            elif define := match(rf"FUNCTION"):
+                ...
 
 
     #def transpile(self):
