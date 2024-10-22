@@ -24,48 +24,55 @@ class Translation():
         indent = ''
 
         # Common regex patterns
-        value = r"[^\[\]]+(?:\[[^'\"]+\])?"
+        value = r"[^'\"\[\]]+(?:\[[^'\"]+\])?"
         # If anyone could clarify if a ' can be in a string in pseudocode, thatd be great
         string = r"'.*'"
         array = r"\[.*\]"
         # regex for variable / array index initialisation
         var_index = r"[^ \[\]]+(?:\[[^ '\"]+\])?"
-        condition = r".*"
-        if_con = r""
+        # Also whether or not its fine for the ' ?' to be a ' *' instead
+        condition = rf"{value}(?: ?(?:=|!=|>|>=|<|<=) ?{value})?(?: (?:AND|OR|NOT) {value}(?: ?(?:=|!=|>|>=|<|<=) ?{value})?)*"
+        arithmetic = r" ?(?:\+|-|\*|\^)"
 
         for line in self.pseudocode:
 
-            # Check if the line is a declaration and initialization of a variable
+            # declaration and initialization of a variable
             if var_set := match(rf"{indent}SET ({var_index}) TO ({value}|{string}|{array})", line):
                 self._transpiled += f'{indent}{var_set.group(1)} = {var_set.group(2)}\n'
 
             elif line == '\n':
                 self._transpiled += line
 
-            # Check if the line is a print function
+            # print function
             elif print_function := match(rf"{indent}SEND ({value}|{string}|{array}) TO DISPLAY", line):
                 self._transpiled += f'{indent}print({print_function.group(1).replace(' ', '')})\n'
             
-            # Check if the line is an input function
-            elif input_function := match(rf"RECEIVE ({var_index}) FROM (?:\(STRING\)|\(INTEGER\)|\(CHARACTER\)) KEYBOARD"):
-                self._transpiled = f'{input_function.group(1)} = input()'
+            # input function
+            elif input_function := match(rf"RECEIVE ({var_index}) FROM (?:\(STRING\)|\(INTEGER\)|\(CHARACTER\)) KEYBOARD", line):
+                self._transpiled = f'{indent}{input_function.group(1)} = input()'
 
-            elif if_condition := match(rf'{indent}IF (.)+ THEN', line):
-                self.transpiled += f'if {if_condition}:'
+            # If conditions
+            elif if_condition := match(rf'{indent}IF ({condition}) THEN', line):
+                self._transpiled += f'{indent}if {if_condition.group(1)}:\n'
                 indent += '    '
+            
+            elif elif_condition := match(rf"{indent.removesuffix('    ')}ELSE IF ({condition}) THEN", line):
+                self._transpiled += f'{indent}'
+            
+            elif fullmatch(rf'{indent.removesuffix('    ')}END IF', line):
+                indent.removesuffix('    ')
 
             elif while_loop := match(rf"WHILE (.+) DO", line):
                 self._transpiled += f'{indent}while {while_loop.group(1)}:\n'
                 indent += '    '
             
-            #elif indent:
-            elif fullmatch(rf'{indent.removesuffix('    ')}END WHILE', line):
-                indent.removesuffix('    ')
+            elif match(rf'{indent.removesuffix('    ')}END WHILE', line):
+                indent = indent.removesuffix('    ')
             
             elif fullmatch(rf'REPEAT', line):
                 ...
             
-            elif define := match(rf"FUNCTION"):
+            elif define := match(rf"FUNCTION", line):
                 ...
 
 
@@ -84,4 +91,7 @@ class Translation():
 
 
     def precompile(self):
-        ...
+        temp = ''
+        temp.join(self.pseudocode)
+        #if search(r"RANDOM\(([0-9]+|[^\[\]]+(?:\[[^'\"]+\])?))\)", temp):
+            

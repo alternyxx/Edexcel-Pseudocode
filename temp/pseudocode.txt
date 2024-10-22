@@ -6,3 +6,8 @@ WHILE a != 3 DO
     SEND hello[a] TO DISPLAY
     SET a TO a + 1
 END WHILE
+
+SET b TO 10
+SET b TO b - 7
+IF b == 3 THEN
+    SEND 'yay!' TO DISPLAY

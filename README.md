@@ -6,5 +6,5 @@ https://tools.withcode.uk/ks4pseudo/media/edexcel_pseudocode.pdf
 
 A Pearon Internation GCSEs pseudocode to Python transpiler!
 ## TO DO
-Currently all the transpiler supports is variables and the print function!
-Don't know how to implment column indexes for python for arrays but did implement arrays
+Pretty much done are variable declaration and initialisation, while loops, if and ONLY if conditions, and input and print.
+In work, random function, function declaration.
