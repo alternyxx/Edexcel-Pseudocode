@@ -5,6 +5,8 @@ Well, this is to help those who want to test and run their pseudocode written as
 https://tools.withcode.uk/ks4pseudo/media/edexcel_pseudocode.pdf
 
 A Pearon Internation GCSEs pseudocode to Python transpiler!
+## Notes
+idk how to implement repeat
+pls do not use RANDOM(), <>, AND, NOT, OR in strings as these are replaced by their pythonic equivalent, i do not know how to make sure theyre not in a string :D
 ## TO DO
-Pretty much done are variable declaration and initialisation, while loops, if and ONLY if conditions, and input and print.
-In work, random function, function declaration.
+Arithmetic
