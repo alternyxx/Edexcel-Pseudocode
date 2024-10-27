@@ -1,18 +1,16 @@
 from sys import exit
+from argparse import ArgumentParser, Namespace
 
-class args():
-    def __init__(self, args: list) -> None:
-        self.args = args
+class Args():
+    def __init__(self) -> None:
+        self.parser = ArgumentParser(
+                    prog = 'EdexcelPseudocode',
+                    description = 'Transpile Pearson International GCSE Pseudocode to Python, essentially making them runnable and testable.')
+        self.parser.add_arguement(
+            'file', help = 'Enter file name in which the pseudocode is written.'
+        )
+        self.args: Namespace = self.parser.parse_args()
 
-
-    @property
-    def args(self):
-        return self._args
-    
-
-    @args.setter
-    def args(self, args):
-        self._args = args
 
     def action(self):
         if len(self.args):
