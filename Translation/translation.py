@@ -4,31 +4,31 @@ from os import path
 # Class for conditions within ifs, elifs and elses 
 class Condition():
     def __init__(self, condition: str) -> None:
-        self.condition = condition
+        self.condition: str = condition
 
     
     @property
-    def condition(self):
+    def condition(self) -> str:
         return self._condition
 
 
     @condition.setter
-    def condition(self, condition):
+    def condition(self, condition) -> None:
         # Replace valid python syntax
         # I actually dont know how to make sure these are not in a string, so just pray :pray:
         # did look into (?:)
-        self._condition = sub(r'<>', '!=', sub(r'=', '==', sub(r'NOT', 'not', sub(r'AND', 'and', sub(r'OR', 'or', condition)))))
+        self._condition: str = sub(r'<>', '!=', sub(r'=', '==', sub(r'NOT', 'not', sub(r'AND', 'and', sub(r'OR', 'or', condition)))))
 
 
-    def __str__(self):
+    def __str__(self) -> str:
         return self._condition
 
 
 class Translation():
-    def __init__(self, pseudocode: str) -> None:
-        self.pseudocode = pseudocode
-        self._variables = {}
-        self._transpiled = ''
+    def __init__(self, pseudocode: list) -> None:
+        self.pseudocode: list = pseudocode
+        self._variables: str = {}
+        self._transpiled: str = ''
 
 
     # Getter for the written pseudocode
@@ -38,8 +38,8 @@ class Translation():
 
 
     @pseudocode.setter
-    def pseudocode(self, pseudocode: str) -> None:
-        self._pseudocode = pseudocode
+    def pseudocode(self, pseudocode: list) -> None:
+        self._pseudocode: list = list
     
 
     def compile(self):
@@ -137,10 +137,13 @@ class Translation():
             elif define := fullmatch(rf"{indent}FUNCTION{space}({variable}){space}?(\((?:{variable}(?:,{space}{variable}?))*\))({end_of_line})", result_line):
                 self._transpiled += f"def {define.group(1)}({(define.group(2))}): {(define.group(3))}"
             
-            elif begin_function := fullmatch(rf"{indent}BEGIN FUNCTION({end_of_line})", result_line):
+            elif fullmatch(rf"{indent}BEGIN FUNCTION({end_of_line})", result_line):
                 indent += '    '
             
             elif return_val := fullmatch(rf"{indent.removesuffix('    ')}RETURN (.*)", result_line):
+                ...
+            
+            elif fullmatch(rf"{indent.removesuffix('    ')}RETURN (.*)", result_line):
                 ...
             
             else:   

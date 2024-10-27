@@ -3,11 +3,11 @@ from Translation.args import Args
 
 def main() -> None:
     # Class for handling CLI
-    args = Args()
+    args: Args = Args()
     # File interpretation
     try:
         with open(args.args.Pseudocode_File) as file:
-            pseudocode = file.readlines()
+            pseudocode: list = file.readlines()
     # Doesnt Exist
     except FileNotFoundError:
         print("File doesn't exist")
