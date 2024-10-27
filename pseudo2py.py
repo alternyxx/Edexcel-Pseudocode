@@ -1,26 +1,26 @@
 from Translation.translation import Translation
-from os import path
+from Translation.args import Args
 
 def main() -> None:
+    # Class for handling CLI
+    args = Args()
+    # File interpretation
     try:
-        with open(path.join('temp', 'pseudocode.txt')) as file:
+        with open(args.args.Pseudocode_File) as file:
             pseudocode = file.readlines()
+    # Doesnt Exist
     except FileNotFoundError:
         print("File doesn't exist")
-    except IndexError:
-        print("pseudo2python --h for help")
     else:
+        # Translate the file
         translation = Translation(pseudocode)
         translation.compile()
-        translation.output_file()
+        translation.output_file('transpiled.py')
+        if args.args.Output_File:
+            translation.output_file(args.args.Output_File)
 
-        # A rare time and never should anyone break the practice of importing at the top
-        # This is to run the transpiled file
-        import temp.transpiled
-
-def parsing() -> None:
-    ...
-
+        # Run the transpiled file
+        __import__('transpiled')
 
 if __name__ == "__main__":
     main()    

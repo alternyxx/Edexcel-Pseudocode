@@ -25,21 +25,21 @@ class Condition():
 
 
 class Translation():
-    def __init__(self, PSEUDOCODE: str) -> None:
-        self.PSEUDOCODE = PSEUDOCODE
+    def __init__(self, pseudocode: str) -> None:
+        self.pseudocode = pseudocode
         self._variables = {}
         self._transpiled = ''
 
 
-    # Getter for the written PSEUDOCODE
+    # Getter for the written pseudocode
     @property
-    def PSEUDOCODE(self) -> str:
-        return self._PSEUDOCODE
+    def pseudocode(self) -> str:
+        return self._pseudocode
 
 
-    @PSEUDOCODE.setter
-    def PSEUDOCODE(self, PSEUDOCODE: str) -> None:
-        self._PSEUDOCODE = PSEUDOCODE
+    @pseudocode.setter
+    def pseudocode(self, pseudocode: str) -> None:
+        self._pseudocode = pseudocode
     
 
     def compile(self):
@@ -48,30 +48,32 @@ class Translation():
 
         # Common regex patterns
         value: str = r"[^'\"\[\]]+(?:\[[^'\"]+\])*"
-        # If anyone could clarify if a ' can be in a string in PSEUDOCODE, thatd be great
-        string: str = r"(?:'.*'|\".*\")"
+        # If anyone could clarify if a ' can be in a string in pseudocode, thatd be great
+        string: str = r"'[^']*'|\"[^\"]\""
         array: str = r"\[.*\]"
         # regex for variable / array index initialisation
         variable: str = r"[^ '\"\[\]]+"
         var_index: str = rf"{variable}(?:\[[^'\"]+\])*"
         # Also whether or not its fine for the ' ?' to be a ' *' instead
         condition: str = rf"(?:NOT )?{value}(?: ?(?:=|<>|>|>=|<|<=) ?{value})?(?: (?:AND|OR) (?:NOT )?{value}(?: ?(?:=|<>|>|>=|<|<=) ?{value})?)*"
-        arithmetic: str = r" ?(?:\+|-|\*|\^)"
-        comment: str = r'#.*'
-        end_of_line: str = rf' *(?:{comment})?(?:\n)?'
+        
+        space: str = rf"(?:\\ )"
+        newline:str = rf"(?:\\n)"
+        comment: str = r"#.*"
+        end_of_line: str = rf"{space}*(?:{comment})?{newline}?"
 
-        for line in self.PSEUDOCODE:
-
+        for lin in self.pseudocode:
+            line = escape(lin)
             # Variables and arrays
-            if var_set := fullmatch(rf"{indent}SET ({var_index}) TO ({value}|{string}|{array})({end_of_line})", line):
+            if var_set := fullmatch(rf"{indent}SET{space}({var_index}){space}TO{space}({value}|{string}|{array})({end_of_line})", line):
                 self._transpiled += f'{indent}{var_set.group(1)} = {var_set.group(2)}{str(var_set.group(3) or '')}'
 
             # Empty lines / Comments
-            elif empty_line := fullmatch(rf'({end_of_line})', line):
+            elif empty_line := fullmatch(rf"({end_of_line})", line):
                 self._transpiled += f'{str(empty_line.group(1) or '')}'
 
             # Input / Output
-            elif print_function := fullmatch(rf"{indent}SEND ({value}|{string}|{array}) TO DISPLAY({end_of_line})", line):
+            elif print_function := fullmatch(rf"{indent}SEND{space}({value}|{string}|{array}){space}TO{space}DISPLAY({end_of_line})", line):
                 self._transpiled += f'{indent}print({print_function.group(1).replace(' ', '')}){str(print_function.group(2) or '')}'
 
             elif input_function := fullmatch(rf"{indent}RECEIVE ({var_index}) FROM (\(STRING\)|\(INTEGER\)|\(CHARACTER\)) KEYBOARD({end_of_line})", line):
@@ -131,7 +133,7 @@ class Translation():
 
             # Subprograms
             elif define := fullmatch(rf"{indent}FUNCTION ({variable}) ?(\((?:{variable}(?:, {variable}?))*\))({end_of_line})", line):
-                ...
+                self._transpiled += f"def {define.group(1)(define.group(2))}"
             
             elif return_val := fullmatch(rf"{indent.removesuffix('    ')}RETURN (.*)", line):
                 ...
@@ -139,25 +141,27 @@ class Translation():
             else:   
                 print(indent, 'baa')
                 print(line)
-                print(f'Syntax Error at line {self.PSEUDOCODE.index(line) + 1}')
+                print(f'Syntax Error at line {self.pseudocode.index(lin) + 1}')
                 exit()
         
         # Additional functions
-        self._transpiled, count = subn(r'RANDOM\(', 'randint(0, ',  ''.join(self._transpiled))
+        self._transpiled = sub(r'LENGTH\(', r'len\(', self._transpiled)    
+        self._transpiled, count = subn(r'RANDOM\(', r'randint\(0, ',  ''.join(self._transpiled))
         if count > 0:
             self._transpiled: str = 'from random import randint\n\n' + self._transpiled
-        print()
+        print('aaaa')
 
 
     #def transpile(self):
         #sub(rf"SET ([^ ]+)( \[[^ '\"]+\])? TO ([^\[\]]+(?: \[[^ '\"]+\])?|'.*'|\[.*\])", "")
 
 
-    def output_file(self):
+    def output_file(self, output_file):
         # Try to transpile the file in the place user gives
         try:
-            with open(path.join('temp', 'transpiled.py'), 'w') as transpiled_file:
+            with open(output_file, 'w') as transpiled_file:
                 # Write the transpiled code
                 transpiled_file.write(self._transpiled)
         except:
             print('Unable to access output file location.')
+            exit()
