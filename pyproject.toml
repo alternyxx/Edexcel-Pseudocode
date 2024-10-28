@@ -1,0 +1,20 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "Edexcel-Pseudocode"
+version = "0.0.1"
+description = "A Pearon International GCSEs pseudocode to Python transpiler"
+readme = "README.md"
+requires-python = ">=3.9"
+license = {file = "LICENSE"}
+authors = [
+  {name = "alternyxx", email = "alternyxx@gmail.com" }
+]
+maintainers = [
+  {name = "alternyxx", email = "alternyxx@gmail.com" }
+]
+
+[project.scripts]
+edexcel = "edexcel:main_cli"
