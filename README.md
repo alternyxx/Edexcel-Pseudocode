@@ -1,4 +1,4 @@
-# psuedo2python
+# Edexcel-Pseudocode
 ## ℹ About 
 There's websites for compiling Cambridge IGCSEs pseudocode on the web (and even a PyPi package!; dudocode) but when you look one up for Pearson IGCSEs pseudocode, there's none?
 Well, this is to help those who want to test and run their pseudocode written as per the appendix at:
