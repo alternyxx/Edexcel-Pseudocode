@@ -86,9 +86,9 @@ class Translation():
 
             elif input_function := fullmatch(rf"{indent}RECEIVE{space}({var_index}){space}FROM{space}(\(STRING\)|\(INTEGER\)|\(CHARACTER\)){space}KEYBOARD({end_of_line})", result_line):
                 if input_function.group(2) == '(INTEGER)':
-                    self._transpiled += f'{indent}{input_function.group(1)} = int(input()){str(input_function.group(3) or '')}'
+                    self._transpiled += f"{indent}{input_function.group(1)} = int(input()){str(input_function.group(3) or '')}"
                 else:
-                    self._transpiled += f'{indent}{input_function.group(1)} = input(){str(input_function.group(3) or '')}'
+                    self._transpiled += f"{indent}{input_function.group(1)} = input(){str(input_function.group(3) or '')}"
 
             # Selection
             elif if_condition := fullmatch(rf"{indent}IF{space}({condition}){space}THEN({end_of_line})", result_line):
