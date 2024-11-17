@@ -96,10 +96,10 @@ class Translation():
                 indent += '    '
             
             elif elif_condition := fullmatch(rf"{indent.removesuffix('    ')}ELSE{space}IF{space}({condition}){space}THEN({end_of_line})", result_line):
-                self._transpiled += f'{indent.removesuffix('    ')}elif {str(Condition(elif_condition.group(1)))}: {str(elif_condition.group(2) or '')}'
+                self._transpiled += f"{indent.removesuffix('    ')}elif {str(Condition(elif_condition.group(1)))}: {str(elif_condition.group(2) or '')}"
             
             elif else_condition := fullmatch(rf"{indent.removesuffix('    ')}ELSE({end_of_line})", result_line):
-                self._transpiled += f'{indent.removesuffix('    ')}else: {str(else_condition.group(1) or '')}'
+                self._transpiled += f"{indent.removesuffix('    ')}else: {str(else_condition.group(1) or '')}"
             
             elif fullmatch(rf"{indent.removesuffix('    ')}END{space}IF({end_of_line})", result_line):
                 indent = indent.removesuffix('    ')
@@ -107,7 +107,7 @@ class Translation():
             # Repitition
             # While loops
             elif while_loop := fullmatch(rf"{indent}WHILE{space}({condition}){space}DO({end_of_line})", result_line):
-                self._transpiled += f'{indent}while {str(Condition(while_loop.group(1)))}:{str(while_loop.group(2) or '')}'
+                self._transpiled += f"{indent}while {str(Condition(while_loop.group(1)))}:{str(while_loop.group(2) or '')}"
                 indent += '    '
             
             elif fullmatch(rf"{indent.removesuffix('    ')}END{space}WHILE({end_of_line})", result_line):
@@ -121,7 +121,7 @@ class Translation():
                 self.transpiled += f"{indent}for _ in range"
 
             elif until := fullmatch(rf"UNTIL{space}{condition}({end_of_line})", result_line):
-                self.transpiled += ''
+                self.transpiled += ""
             
             elif end_repeat := fullmatch(rf"{indent.removesuffix('    ')}END{space}REPEAT({end_of_line})", result_line):
                 ...
@@ -129,13 +129,13 @@ class Translation():
             # For loops
             elif for_loop := fullmatch(rf"{indent}FOR{space}([^ \[\]]+){space}FROM{space}({value}){space}TO{space}({value}){space}(?:(?:STEP{space})({value}){space})?DO({end_of_line})", result_line):
                 if for_loop.group(4):
-                    self._transpiled += f'{indent}for {for_loop.group(1)} in range({for_loop.group(2)}, {for_loop.group(3)} + 1, {for_loop.group(4)}): {str(for_loop.group(5) or '')}'
+                    self._transpiled += f"{indent}for {for_loop.group(1)} in range({for_loop.group(2)}, {for_loop.group(3)} + 1, {for_loop.group(4)}): {str(for_loop.group(5) or '')}"
                 else:
-                    self._transpiled += f'{indent}for {for_loop.group(1)} in range({for_loop.group(2)}, {for_loop.group(3)}): {str(for_loop.group(5) or '')}'
+                    self._transpiled += f"{indent}for {for_loop.group(1)} in range({for_loop.group(2)}, {for_loop.group(3)}): {str(for_loop.group(5) or '')}"
                 indent += '    '
             
             elif iteration := fullmatch(rf'{indent}FOR{space}EACH{space}({var_index}){space}FROM{space}({value}|{string}|{array}){space}DO({end_of_line})', result_line):
-                self._transpiled += f'{indent}for {iteration.group(1)} in {iteration.group(2)}: {str(iteration.group(3) or '')}'
+                self._transpiled += f"{indent}for {iteration.group(1)} in {iteration.group(2)}: {str(iteration.group(3) or '')}"
                 indent += '    '
             
             elif fullmatch(rf'{indent.removesuffix('    ')}END{space}FOR({end_of_line})', result_line):
@@ -146,14 +146,14 @@ class Translation():
             
             # File handling
             elif read := fullmatch(rf"READ{space}(\w+.\w){space}(?:[a-zA-Z0-9_ '\"]*)({end_of_line})", result_line):
-                self._transpiled += f'with open({read.group(1)}) as file:'
+                self._transpiled += f"with open({read.group(1)}) as file:"
 
             elif write := fullmatch(rf"WRITE(?:[a-zA-Z0-9_ '\"]*)({end_of_line})", result_line):
                 ...
 
             # Subprograms
             elif procedure := fullmatch(rf"{indent}PROCEDURE{space}({variable}){space}?(\((?:{variable}(?:,{space}{variable}?))*\))({end_of_line})", result_line):
-                self._transpiled += f'{indent}# This was originally a procedure\n{indent}def {procedure.group(1)}({(define.group(2))}): {(define.group(3))}'
+                self._transpiled += f"{indent}# This was originally a procedure\n{indent}def {procedure.group(1)}({(define.group(2))}): {(define.group(3))}"
 
             elif fullmatch(rf"{indent}BEGIN{space}PROCEDURE({end_of_line})", result_line):
                 indent += '    '
@@ -165,7 +165,7 @@ class Translation():
                 indent += '    '
             
             elif return_val := fullmatch(rf"{indent.removesuffix('    ')}RETURN{space}(.*)({end_of_line})", result_line):
-                self._transpiled += f'{indent}return {return_val.group(1)}'
+                self._transpiled += f"{indent}return {return_val.group(1)}"
             
             elif fullmatch(rf"{indent.removesuffix('    ')}END FUNCTION({end_of_line})", result_line):
                 indent.removesuffix('    ')

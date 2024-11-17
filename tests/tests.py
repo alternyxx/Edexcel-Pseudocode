@@ -1,1 +1,1 @@
-from src.Edexcel_Pseudocode_alternyxx.Translation import *
+from src.Edexcel_Pseudocode.Translation import *
