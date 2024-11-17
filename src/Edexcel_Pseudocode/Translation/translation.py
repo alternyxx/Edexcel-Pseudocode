@@ -138,10 +138,10 @@ class Translation():
                 self._transpiled += f"{indent}for {iteration.group(1)} in {iteration.group(2)}: {str(iteration.group(3) or '')}"
                 indent += '    '
             
-            elif fullmatch(rf'{indent.removesuffix('    ')}END{space}FOR({end_of_line})', result_line):
+            elif fullmatch(rf"{indent.removesuffix('    ')}END{space}FOR({end_of_line})", result_line):
                 indent = indent.removesuffix('    ')
             
-            elif fullmatch(rf'{indent.removesuffix('    ')}END{space}FOR{space}?EACH({end_of_line})', result_line):
+            elif fullmatch(rf"{indent.removesuffix('    ')}END{space}FOR{space}?EACH({end_of_line})", result_line):
                 indent = indent.removesuffix('    ')
             
             # File handling
