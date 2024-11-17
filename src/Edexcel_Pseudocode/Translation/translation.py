@@ -74,7 +74,7 @@ class Translation():
             #result_line = result_line.replace('\\ ', ' ').replace('\\\n', 's\n')
             # Variables and arrays
             if var_set := fullmatch(rf"{indent}SET{space}({var_index}){space}TO{space}({value}|{string}|{array})({end_of_line})", result_line):
-                self._transpiled += f'{indent}{var_set.group(1)} = {var_set.group(2)}{str(var_set.group(3) or '')}'
+                self._transpiled += f"{indent}{var_set.group(1)} = {var_set.group(2)}{str(var_set.group(3) or '')}"
 
             # Empty lines / Comments
             elif empty_line := fullmatch(rf"({end_of_line})", result_line):
