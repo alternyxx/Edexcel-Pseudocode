@@ -26,7 +26,6 @@ class Condition():
 class Translation():
     def __init__(self, pseudocode: list) -> None:
         self.pseudocode: list = pseudocode
-        self._variables: str = {}
         self._transpiled: str = ''
 
 
@@ -41,7 +40,7 @@ class Translation():
         self._pseudocode: list = pseudocode
     
 
-    def compile(self):
+    def transpile(self):
         # For indentation
         indent: str = ''
 
@@ -55,131 +54,195 @@ class Translation():
         var_index: str = rf"{variable}(?:\[[^'\"]+\])*"
         # Also whether or not its fine for the ' ?' to be a ' *' instead
         condition: str = rf"(?:NOT )?{value}(?: ?(?:=|<>|>|>=|<|<=) ?{value})?(?: (?:AND|OR) (?:NOT )?{value}(?: ?(?:=|<>|>|>=|<|<=) ?{value})?)*"
-        
-        # no, even though i unescaped spaces, im not going back to normal ' 's because it has traumatised me
-        space: str = rf"(?: )"
         newline:str = rf"(?:\n)"
         comment: str = r"#.*"
-        end_of_line: str = rf"{space}*(?:{comment})?{newline}?"
+        end_of_line: str = rf" *(?:{comment})?{newline}?"
 
-        end_vals = {
-            "if_statement": [],
-            "while_loop": [],
-            "for_loop": [],
-            "for_each_loop": [],
+        # Compiling regex patterns
+        # Variables and arrays
+        var_set: Pattern = compile(rf"SET ({var_index}) TO ({value}|{string}|{array})({end_of_line})")
+
+        # Empty lines
+        empty_line: Pattern = compile(rf"({end_of_line})")
+
+        # Input/Output
+        print_function: Pattern = compile(rf"SEND ({value}|{string}|{array}) TO DISPLAY({end_of_line})")
+        input_function: Pattern = compile(rf"RECEIVE ({var_index}) FROM (\(STRING\)|\(INTEGER\)|\(CHARACTER\)) KEYBOARD({end_of_line})")
+
+        # Selection
+        if_condition: Pattern = compile(rf"IF ({condition}) THEN({end_of_line})")
+        elif_condition: Pattern = compile(rf"IF ({condition}) THEN({end_of_line})")
+        else_condition: Pattern = compile(rf"ELSE({end_of_line})")
+        end_if: Pattern = compile(rf"END IF({end_of_line})")
+
+        # Repitition
+        # while loops
+        while_loop: Pattern = compile(rf"WHILE ({condition}) DO({end_of_line})")
+        end_while: Pattern = compile(rf"END WHILE({end_of_line})")
+
+        # repeat loops
+        repeat_loop: Pattern = compile(rf"REPEAT({end_of_line})")
+        until: Pattern = compile(rf"UNTIL {condition}({end_of_line})")
+        repeat_for: Pattern = compile(rf"REPEAT ((?:{value}|[0-9]+(?:-Number))) TIMES({end_of_line})")
+        end_repeat: Pattern = compile(rf"END REPEAT({end_of_line})")
+
+        # for loops
+        for_loop: Pattern = compile(rf"FOR ([^ \[\]]+) FROM ({value}) TO ({value}) (?:(?:STEP )({value}) )?DO({end_of_line})")
+        for_each: Pattern = compile(rf"FOR EACH ({var_index}) FROM ({value}|{string}|{array}) DO({end_of_line})")
+        end_for: Pattern = compile(rf"END FOR({end_of_line})")
+        # the appendix i cited doesnt have the space there LMFAO, the textbook has it tho
+        end_for_each: Pattern = compile(rf"END FOR ?EACH({end_of_line})")
+
+        # File handing
+        fread: Pattern = compile(rf"READ (\w+.\w) (?:[a-zA-Z0-9_ '\"]*)({end_of_line})")
+        fwrite: Pattern = compile(rf"WRITE(?:[a-zA-Z0-9_ '\"]*)({end_of_line})")
+
+        # Subprograms
+        procedure: Pattern = compile(rf"PROCEDURE ({variable}) ?(\((?:{variable}(?:, {variable}?))*\))({end_of_line})")
+        begin_procedure: Pattern = compile(rf"BEGIN PROCEDURE({end_of_line})")
+        function: Pattern = compile(rf"FUNCTION ({variable}) ?(\((?:{variable}(?:, {variable}?))*\))({end_of_line})")
+        begin_function: Pattern =compile(rf"BEGIN FUNCTION({end_of_line})")
+        return_val: Pattern = compile(rf"RETURN (.*)")
+        end_function: Pattern = compile(rf"END FUNCTION({end_of_line})")
+
+        # Dev checks
+        variables: list[str] = []
+        functions: list[str] = []
+        end_vals: dict = {
+            "if_statement": {"line": None, "indent": None},
+            "while_loop": {"line": None, "indent": None},
+            "for_loop": {"line": None, "indent": None},
+            "for_each_loop": {"line": None, "indent": None},
             }
 
-        for result_line in self.pseudocode:
-            #result_line = escape(line)
-            #result_line = result_line.replace('\\ ', ' ').replace('\\\n', 's\n')
-            # Variables and arrays
-            if var_set := fullmatch(rf"{indent}SET{space}({var_index}){space}TO{space}({value}|{string}|{array})({end_of_line})", result_line):
-                self._transpiled += f'{indent}{var_set.group(1)} = {var_set.group(2)}{str(var_set.group(3) or '')}'
+        for line in self.pseudocode:
+            if line.startswith(indent):
+                result_line = line.removeprefix(indent)
+                # Variables and arrays
+                if var_set_result := var_set.fullmatch(result_line):
+                    self._transpiled += f"{indent}{var_set_result.group(1)} = {var_set_result.group(2)}{str(var_set_result.group(3) or '')}"
 
-            # Empty lines / Comments
-            elif empty_line := fullmatch(rf"({end_of_line})", result_line):
-                self._transpiled += f"{str(empty_line.group(1) or '')}"
+                # Empty lines / Comments
+                elif empty_line_result := empty_line.fullmatch(result_line):
+                    self._transpiled += f"{str(empty_line_result.group(1) or '')}"
 
-            # Input / Output
-            elif print_function := fullmatch(rf"{indent}SEND{space}({value}|{string}|{array}){space}TO{space}DISPLAY({end_of_line})", result_line):
-                self._transpiled += f"{indent}print({print_function.group(1)}){str(print_function.group(2) or '')}"
+                # Input / Output
+                elif print_function_result := print_function.fullmatch(result_line):
+                    self._transpiled += f"{indent}print({print_function_result.group(1)}){str(print_function_result.group(2) or '')}"
 
-            elif input_function := fullmatch(rf"{indent}RECEIVE{space}({var_index}){space}FROM{space}(\(STRING\)|\(INTEGER\)|\(CHARACTER\)){space}KEYBOARD({end_of_line})", result_line):
-                if input_function.group(2) == '(INTEGER)':
-                    self._transpiled += f'{indent}{input_function.group(1)} = int(input()){str(input_function.group(3) or '')}'
-                else:
-                    self._transpiled += f'{indent}{input_function.group(1)} = input(){str(input_function.group(3) or '')}'
+                elif input_function_result := input_function.fullmatch(result_line):
+                    if input_function_result.group(2) == "(INTEGER)":
+                        self._transpiled += f"{indent}{input_function_result.group(1)} = int(input()){str(input_function_result.group(3) or '')}"
+                    else:
+                        self._transpiled += f"{indent}{input_function_result.group(1)} = input(){str(input_function_result.group(3) or '')}"
 
-            # Selection
-            elif if_condition := fullmatch(rf"{indent}IF{space}({condition}){space}THEN({end_of_line})", result_line):
-                self._transpiled += f"{indent}if {str(Condition(if_condition.group(1)))}: {str(if_condition.group(2) or '')}"
-                indent += '    '
-            
-            elif elif_condition := fullmatch(rf"{indent.removesuffix('    ')}ELSE{space}IF{space}({condition}){space}THEN({end_of_line})", result_line):
-                self._transpiled += f'{indent.removesuffix('    ')}elif {str(Condition(elif_condition.group(1)))}: {str(elif_condition.group(2) or '')}'
-            
-            elif else_condition := fullmatch(rf"{indent.removesuffix('    ')}ELSE({end_of_line})", result_line):
-                self._transpiled += f'{indent.removesuffix('    ')}else: {str(else_condition.group(1) or '')}'
-            
-            elif fullmatch(rf"{indent.removesuffix('    ')}END{space}IF({end_of_line})", result_line):
-                indent = indent.removesuffix('    ')
+                # Selection
+                elif if_condition_result := if_condition.fullmatch(result_line):
+                    self._transpiled += f"{indent}if {str(Condition(if_condition_result.group(1)))}: {str(if_condition_result.group(2) or '')}"
+                    indent += '    '
 
-            # Repitition
-            # While loops
-            elif while_loop := fullmatch(rf"{indent}WHILE{space}({condition}){space}DO({end_of_line})", result_line):
-                self._transpiled += f'{indent}while {str(Condition(while_loop.group(1)))}:{str(while_loop.group(2) or '')}'
-                indent += '    '
-            
-            elif fullmatch(rf"{indent.removesuffix('    ')}END{space}WHILE({end_of_line})", result_line):
-                indent = indent.removesuffix('    ')
+                # Repitition
+                # While loops
+                elif while_loop_result := while_loop.fullmatch(result_line):
+                    self._transpiled += f"{indent}while {str(Condition(while_loop_result.group(1)))}:{str(while_loop_result.group(2) or '')}"
+                    indent += '    '
+                
+                # Repeat loops
+                elif repeat := fullmatch(rf"{indent}REPEAT({end_of_line})", result_line):
+                    ...
 
-            # Repeat loops
-            elif repeat := fullmatch(rf"{indent}REPEAT({end_of_line})", result_line):
-                ...
+                elif repeat_for_result := repeat_for.fullmatch(result_line):
+                    self.transpiled += f"{indent}for _ in range"
 
-            elif repeat_for := fullmatch(rf"{indent}REPEAT({end_of_line})((?:value|[0-9]+(?:-Number))){space}TIMES({end_of_line})", result_line):
-                self.transpiled += f"{indent}for _ in range"
+                # For loops
+                elif for_loop_result := for_loop.fullmatch(result_line):
+                    if for_loop_result.group(4):
+                        self._transpiled += f'{indent}for {for_loop_result.group(1)} in range({for_loop_result.group(2)}, {for_loop_result.group(3)} + 1, {for_loop_result.group(4)}): {str(for_loop_result.group(5) or '')}'
+                    else:
+                        self._transpiled += f'{indent}for {for_loop_result.group(1)} in range({for_loop_result.group(2)}, {for_loop_result.group(3)}): {str(for_loop_result.group(5) or '')}'
+                    indent += '    '
+                
+                elif for_each_result := for_each.fullmatch(result_line):
+                    self._transpiled += f'{indent}for {for_each_result.group(1)} in {for_each_result.group(2)}: {str(for_each_result.group(3) or '')}'
+                    indent += '    '
+                
+                # File handling
+                elif fread_result := fread.fullmatch(result_line):
+                    self._transpiled += f"with open({fread_result.group(1)}) as file:"
 
-            elif until := fullmatch(rf"UNTIL{space}{condition}({end_of_line})", result_line):
-                self.transpiled += ''
-            
-            elif end_repeat := fullmatch(rf"{indent.removesuffix('    ')}END{space}REPEAT({end_of_line})", result_line):
-                ...
+                elif fwrite_result := fwrite.fullmatch(result_line):
+                    self._transpiled += f"with open({fwrite_result.group(1)}, w) as file:"
 
-            # For loops
-            elif for_loop := fullmatch(rf"{indent}FOR{space}([^ \[\]]+){space}FROM{space}({value}){space}TO{space}({value}){space}(?:(?:STEP{space})({value}){space})?DO({end_of_line})", result_line):
-                if for_loop.group(4):
-                    self._transpiled += f'{indent}for {for_loop.group(1)} in range({for_loop.group(2)}, {for_loop.group(3)} + 1, {for_loop.group(4)}): {str(for_loop.group(5) or '')}'
-                else:
-                    self._transpiled += f'{indent}for {for_loop.group(1)} in range({for_loop.group(2)}, {for_loop.group(3)}): {str(for_loop.group(5) or '')}'
-                indent += '    '
-            
-            elif iteration := fullmatch(rf'{indent}FOR{space}EACH{space}({var_index}){space}FROM{space}({value}|{string}|{array}){space}DO({end_of_line})', result_line):
-                self._transpiled += f'{indent}for {iteration.group(1)} in {iteration.group(2)}: {str(iteration.group(3) or '')}'
-                indent += '    '
-            
-            elif fullmatch(rf'{indent.removesuffix('    ')}END{space}FOR({end_of_line})', result_line):
-                indent = indent.removesuffix('    ')
-            
-            elif fullmatch(rf'{indent.removesuffix('    ')}END{space}FOR{space}?EACH({end_of_line})', result_line):
-                indent = indent.removesuffix('    ')
-            
-            # File handling
-            elif read := fullmatch(rf"READ{space}(\w+.\w){space}(?:[a-zA-Z0-9_ '\"]*)({end_of_line})", result_line):
-                self._transpiled += f'with open({read.group(1)}) as file:'
+                # Subprograms
+                elif procedure_result := procedure.fullmatch(result_line):
+                    self._transpiled += f'{indent}# This was originally a procedure\n{indent}def {procedure_result.group(1)}({(procedure_result.group(2))}): {(procedure_result.group(3))}'
 
-            elif write := fullmatch(rf"WRITE(?:[a-zA-Z0-9_ '\"]*)({end_of_line})", result_line):
-                ...
+                elif fullmatch(result_line):
+                    indent += '    '
 
-            # Subprograms
-            elif procedure := fullmatch(rf"{indent}PROCEDURE{space}({variable}){space}?(\((?:{variable}(?:,{space}{variable}?))*\))({end_of_line})", result_line):
-                self._transpiled += f'{indent}# This was originally a procedure\n{indent}def {procedure.group(1)}({(define.group(2))}): {(define.group(3))}'
+                elif function_result := function.fullmatch(result_line):
+                    self._transpiled += f"def {function_result.group(1)}({(function_result.group(2))}): {(function_result.group(3))}"
+                
+                elif fullmatch(result_line):
+                    indent += '    '
+                
+                elif return_val_result := return_val.fullmatch(result_line):
+                    self._transpiled += f"{indent}return {return_val_result.group(1)}{return_val_result.group(2)}"
+                
+                elif call_result := fullmatch(rf"{indent}({'|'.join(functions)})({end_of_line})", result_line):
+                    self.transpiled += f"{call_result.group(1)}"
 
-            elif fullmatch(rf"{indent}BEGIN{space}PROCEDURE({end_of_line})", result_line):
-                indent += '    '
+                # Unrecognised syntax
+                else:   
+                    print(f'Syntax Error at line {self.pseudocode.index(line) + 1}')
+                    exit()
 
-            elif define := fullmatch(rf"{indent}FUNCTION{space}({variable}){space}?(\((?:{variable}(?:,{space}{variable}?))*\))({end_of_line})", result_line):
-                self._transpiled += f"def {define.group(1)}({(define.group(2))}): {(define.group(3))}"
-            
-            elif fullmatch(rf"{indent}BEGIN{space}FUNCTION({end_of_line})", result_line):
-                indent += '    '
-            
-            elif return_val := fullmatch(rf"{indent.removesuffix('    ')}RETURN{space}(.*)({end_of_line})", result_line):
-                self._transpiled += f'{indent}return {return_val.group(1)}'
-            
-            elif fullmatch(rf"{indent.removesuffix('    ')}END FUNCTION({end_of_line})", result_line):
-                indent.removesuffix('    ')
-            
-            # Unrecognised syntax
-            else:   
-                print(f'Syntax Error at line {self.pseudocode.index(result_line) + 1}')
-                exit()
-        
+            # Deindent section
+            else:
+                # Selection
+                result_line = line.removeprefix(indent + '    ')
+                if elif_condition_result := elif_condition.fullmatch(result_line):
+                    self._transpiled += f"{indent.removesuffix('    ')}elif {str(Condition(elif_condition_result.group(1)))}: {str(elif_condition_result.group(2) or '')}"
+                
+                elif else_condition_result := else_condition.fullmatch(result_line):
+                    self._transpiled += f"{indent.removesuffix('    ')}else: {str(else_condition_result.group(1) or '')}"
+                
+                elif end_if.fullmatch(result_line):
+                    indent = indent.removesuffix('    ')
+
+                # Repitition
+                # While Loops
+                elif end_while.fullmatch(result_line):
+                    indent = indent.removesuffix('    ')
+
+                # Repeat Loops
+                elif until_result := until.fullmatch(result_line):
+                    self.transpiled += ""
+                
+                elif end_repeat := fullmatch(result_line):
+                    ...
+
+                # For Loops
+                elif end_for.fullmatch(result_line):
+                    indent = indent.removesuffix('    ')
+                
+                elif end_for_each.fullmatch(result_line):
+                    indent = indent.removesuffix('    ')
+
+                # Subprograms
+                elif end_function.fullmatch(result_line):
+                    indent.removesuffix('    ')
+                
+                else:   
+                    print(f'Syntax Error at line {self.pseudocode.index(line) + 1}')
+                    exit()
+
         # Additional functions
+        # Skip over strings
         self._transpiled = sub(r'LENGTH\(', r'len\(', self._transpiled)    
         self._transpiled, count = subn(r'RANDOM\(', r'randint\(0, ',  ''.join(self._transpiled))
         if count > 0:
-            self._transpiled: str = 'from random import randint\n\n' + self._transpiled
+            self._transpiled = 'from random import randint\n\n' + self._transpiled
 
 
     def output_file(self, output_file):

@@ -1,5 +1,7 @@
-from Translation.translation import Translation
-import cli
+# from Translation.translation import Translation
+# import cli
+from src.Edexcel_Pseudocode import *
+
 
 def main() -> None:
     # Class for handling CLI
@@ -13,8 +15,8 @@ def main() -> None:
         print("File doesn't exist")
     else:
         # Translate the file
-        translation = Translation(pseudocode)
-        translation.compile()
+        translation = translation.Translation(pseudocode)
+        translation.transpile()
         translation.output_file('transpiled.py')
         if args.args.Output_File:
             translation.output_file(args.args.Output_File)

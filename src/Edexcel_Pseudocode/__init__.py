@@ -1,1 +1,4 @@
-__all__ = ["cli", "Translation.translation"]
+__all__ = [
+    "cli",
+    "Translation.translation",
+]
