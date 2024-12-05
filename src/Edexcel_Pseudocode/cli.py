@@ -13,5 +13,4 @@ class Args():
         self.parser.add_argument(
             "Output_File", help = "[Optional] Enter file name in which the pseudocode will be transpiled to Python.", default = None, nargs = '?')
         self.args: Namespace = self.parser.parse_args()
-        print(self.args.Pseudocode_File)
  

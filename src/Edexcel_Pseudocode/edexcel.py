@@ -15,11 +15,11 @@ def main() -> None:
         print("File doesn't exist")
     else:
         # Translate the file
-        translation = translation.Translation(pseudocode)
-        translation.transpile()
-        translation.output_file('transpiled.py')
+        translate = translation.Translation(pseudocode)
+        translate.transpile()
+        translate.output_file('transpiled.py')
         if args.args.Output_File:
-            translation.output_file(args.args.Output_File)
+            translate.output_file(args.args.Output_File)
 
         # Run the transpiled file
         __import__('transpiled')

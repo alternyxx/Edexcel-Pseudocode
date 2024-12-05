@@ -1,4 +1,4 @@
-from src.Edexcel_Pseudocode import Translation
+from src.Edexcel_Pseudocode import translation
 
 # The following pseudocode is from the 2024 June CS paper 1
 pseudocode = """
@@ -30,8 +30,8 @@ SEND "Trains late:    " + late TO DISPLAY
 pseudocode = "SEND \"hello, world\n\" TO DISPLAY"
 
 def test_output(capfd):
-    translation = Translation(pseudocode)
-    translation.transpile()
-    translation.output("tests_output.py")
+    translate = translation.Translation(pseudocode)
+    translate.transpile()
+    translate.output("transpiled.py")
     output, _error = capfd.readouterr()
     assert output == "hello, world\n"

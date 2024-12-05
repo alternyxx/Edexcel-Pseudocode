@@ -7,7 +7,7 @@ packages = ["src/Edexcel_Pseudocode_alternyxx"]
 
 [project]
 name = "Edexcel-Pseudocode"
-version = "0.0.1"
+version = "0.0.2"
 description = "A Pearon International GCSEs pseudocode to Python transpiler"
 readme = "README.md"
 requires-python = ">=3.9"
