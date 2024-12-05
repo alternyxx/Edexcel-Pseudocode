@@ -3,7 +3,7 @@ from argparse import ArgumentParser, Namespace
 class Args():
     def __init__(self) -> None:
         self.parser: ArgumentParser = ArgumentParser(
-                                            prog = "EdexcelPseudocode",
+                                            prog = "edexcel",
                                             #usage = '%(prog)s [options] Pseudocode_File'
                                             description = "Transpile Pearson International GCSE Pseudocode to Python, essentially making them runnable and testable."
                                             )

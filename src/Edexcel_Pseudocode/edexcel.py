@@ -1,6 +1,6 @@
 # from Translation.translation import Translation
 # import cli
-from src.Edexcel_Pseudocode import *
+from edexcel_pseudocode import *
 
 
 def main() -> None:
@@ -17,12 +17,11 @@ def main() -> None:
         # Translate the file
         translate = translation.Translation(pseudocode)
         translate.transpile()
-        translate.output_file('transpiled.py')
         if args.args.Output_File:
             translate.output_file(args.args.Output_File)
 
         # Run the transpiled file
-        __import__('transpiled')
+        exec(translate._transpiled)
 
 if __name__ == "__main__":
     main()

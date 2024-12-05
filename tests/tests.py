@@ -1,4 +1,4 @@
-from src.Edexcel_Pseudocode import translation
+from src.edexcel_pseudocode import translation
 
 # The following pseudocode is from the 2024 June CS paper 1
 pseudocode = """
